@@ -2,6 +2,7 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import { useShoppingCart } from "@/context/ShoppingCartContext";
+import gambarqris from "@/public/gambarqris.png";
 import { useFetchProducts } from "@/utils/api";
 import supabase from "@/utils/supabase";
 import { CheckIcon, RefreshCcw } from "lucide-react";
@@ -302,6 +303,22 @@ if (!product) {
           <div className="mt-2 text-base text-slate-500">
             BNI : 1871199798 a/n Gigih Nur Ifani Yusro
           </div>
+          <div className="_QRIS mt-5 grid w-full max-w-sm items-center gap-1.5">
+            <Label htmlFor="qris">
+              Scan QRIS untuk Pembayaran
+              <div className="mt-2 text-base text-slate-500">
+                Pastikan untuk mengunggah bukti pembayaran setelah transfer.
+              </div>
+            </Label>
+            <Image
+              src={gambarqris} // Ganti dengan path QRIS Anda
+              alt="QRIS Payment"
+              width={250}
+              height={250}
+              className="h-auto rounded-md border object-contain"
+            />
+          </div>
+
         </Label>
         {productForm.proof_of_transaction_url && (
           <div>
