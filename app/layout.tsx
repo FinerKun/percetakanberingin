@@ -1,10 +1,10 @@
-import "./globals.css";
 import { montserrat } from "@/lib/fonts";
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ekraf's Things",
-  description: "Ekraf's Website from BEM FKG ULM",
+  title: "Percetakan Beringin",
+  description: "Percetakan Beringin Website",
 };
 
 export default function RootLayout({

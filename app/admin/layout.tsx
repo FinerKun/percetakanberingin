@@ -1,14 +1,13 @@
+import { createClient } from "@/utils/supabase/server";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { Metadata } from "next";
 import { ReactNode } from "react";
-import { createClient } from "@/utils/supabase/server";
 
 // component
-import { PlusIcon } from "lucide-react";
 import {
-  SideNavigation,
   NavigationHeading,
+  SideNavigation,
 } from "@/components/admin/Navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,10 +17,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PlusIcon } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Admin | Ekraf's Things",
-  description: "Ekraf's Admin Website from BEM FKG ULM",
+  title: "Admin | Percetakan Beringin",
+  description: "Percetakan Beringin Admin Website",
 };
 
 interface LayoutProps {
