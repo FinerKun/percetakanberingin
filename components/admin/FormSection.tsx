@@ -178,7 +178,7 @@ export function FormSection({ id, value }: FormSectionProps) {
 
   const [images, setImages] = useState<any[]>([]);
   const CDNURL =
-    "https://nfowbvxizyygtrmnnzpi.supabase.co/storage/v1/s3/object/public/images/";
+    "https://vdmsolvdwppbygjhxslv.supabase.co/storage/v1/s3/object/public/images/";
   async function getImages() {
     const { data, error } = await supabase.storage
       .from("images")
