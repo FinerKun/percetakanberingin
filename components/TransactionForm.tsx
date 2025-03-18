@@ -155,8 +155,8 @@ if (!product) {
 
     setLoading(false);
     console.log("Response dari API Order Items:", responseOrder);
-    if (responseOrder && responseOrder.data && responseOrder.data.length > 0 && responseOrder.data[0].id) {
-      alert("Pesananmu telah berhasil");
+    if (responseOrder && responseOrder.success && responseOrder.order && responseOrder.order.length > 0) {
+      alert("Pesananmu telah berhasil!");
       location.reload();
     } else {
       console.error("Error: Response API tidak memiliki data yang valid", responseOrder);
