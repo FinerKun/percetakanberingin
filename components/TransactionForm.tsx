@@ -158,10 +158,13 @@ if (!product) {
     if (responseOrder && responseOrder.success && responseOrder.order && responseOrder.order.length > 0) {
       alert("Pesananmu telah berhasil!");
       location.reload();
+    } else if (responseOrder?.error?.includes("Stok tidak mencukupi")) {
+      alert("Pesanan gagal: Stok produk tidak mencukupi. Silakan kurangi jumlah pesanan atau pilih produk lain.");
     } else {
       console.error("Error: Response API tidak memiliki data yang valid", responseOrder);
       alert("Terjadi kesalahan dalam memproses pesanan. Coba lagi.");
     }
+    
     
   };
 
