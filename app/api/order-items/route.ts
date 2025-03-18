@@ -17,7 +17,6 @@ export async function GET(request: Request) {
   return NextResponse.json(response);
 }
 
-
 export async function POST(request: Request) {
   const supabase = createClient();
   const data = await request.json();
@@ -29,7 +28,16 @@ export async function POST(request: Request) {
     .eq("id", data.product_id)
     .single();
 
-  if (!productResponse.data || productResponse.data.stock < data.quantity) {
+  console.log("Product Response:", productResponse);
+
+  if (!productResponse.data) {
+    return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
+  }
+
+  console.log("Stock saat ini:", productResponse.data.stock);
+  console.log("Quantity yang dipesan:", data.quantity);
+
+  if (productResponse.data.stock < data.quantity) {
     return NextResponse.json({ error: "Stok tidak mencukupi" }, { status: 400 });
   }
 
@@ -44,7 +52,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json(response);
 }
-
 
 export async function PATCH(request: Request) {
   const supabase = createClient();
@@ -70,4 +77,3 @@ export async function DELETE(request: Request) {
 
   return NextResponse.json(response);
 }
-
