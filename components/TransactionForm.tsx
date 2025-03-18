@@ -301,11 +301,11 @@ if (!product) {
         <Label htmlFor="proof_of_transaction_url">
           Bukti Pembayaran ( .jpg, .png )
           <div className="mt-2 text-base text-slate-500">
-            BNI : 1871199798 a/n Gigih Nur Ifani Yusro
+          Jago: 105852900512 A/n Stefanus Derren Kurniawan
           </div>
           <div className="_QRIS mt-5 grid w-full max-w-sm items-center gap-1.5">
             <Label htmlFor="qris">
-              Scan QRIS untuk Pembayaran
+              Scan QRIS untuk Pembayaran (Percetakan Beringin)
               <div className="mt-2 text-base text-slate-500">
                 Pastikan untuk mengunggah bukti pembayaran setelah transfer.
               </div>
