@@ -17,14 +17,69 @@ export async function GET(request: Request) {
   return NextResponse.json(response);
 }
 
+
+
+interface OrderItem {
+  product_id: number;
+  quantity: number;
+}
+
 export async function POST(request: Request) {
   const supabase = createClient();
-  const data = await request.json();
+  const data: OrderItem[] = await request.json(); // Data berupa array berisi produk yang dipesan
 
-  const response = await supabase.from(tableName).insert(data).select();
+  console.log("Data pesanan diterima:", data);
 
-  return NextResponse.json(response);
+  // Ambil semua ID produk dari pesanan
+  const productIds = data.map((item: OrderItem) => item.product_id);
+
+  // Ambil stok produk dari database
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("id, stock")
+    .in("id", productIds);
+
+  if (error || !products) {
+    return NextResponse.json({ error: "Gagal mengambil data produk" }, { status: 500 });
+  }
+
+  console.log("Data produk di database:", products);
+
+  // Cek apakah stok cukup untuk semua produk
+  for (const item of data) {
+    const product = products.find(p => p.id === item.product_id);
+    if (!product || product.stock < item.quantity) {
+      return NextResponse.json({ error: `Stok tidak mencukupi untuk produk ID ${item.product_id}` }, { status: 400 });
+    }
+  }
+
+  // Kurangi stok produk
+  const updates = data.map((item: OrderItem) => {
+    const product = products.find(p => p.id === item.product_id);
+    return {
+      id: item.product_id,
+      stock: product!.stock - item.quantity,
+    };
+  });
+
+  const { error: updateError } = await supabase
+    .from("products")
+    .upsert(updates, { onConflict: "id" }); // Perbaikan: Ubah onConflict menjadi string tunggal
+
+  if (updateError) {
+    return NextResponse.json({ error: "Gagal memperbarui stok produk" }, { status: 500 });
+  }
+
+  // Simpan semua order sekaligus
+  const { data: orderResponse, error: orderError } = await supabase.from(tableName).insert(data).select();
+
+  if (orderError) {
+    return NextResponse.json({ error: "Gagal menyimpan pesanan" }, { status: 500 });
+  }
+
+  return NextResponse.json(orderResponse);
 }
+
 
 export async function PATCH(request: Request) {
   const supabase = createClient();
