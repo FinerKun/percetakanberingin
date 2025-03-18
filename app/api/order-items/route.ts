@@ -45,7 +45,8 @@ export async function POST(request: Request) {
 
   const updates = data.map((item: { uuid_product: string; quantity: number }) => {
     const product = products.find((p: { id: string; stock: number }) => p.id === item.uuid_product);
-    const newStock = Math.max(0, (product?.stock || 0) - item.quantity); // Hindari NULL
+    const newStock = Math.max(0, ((product?.stock ?? 0) - item.quantity));
+
     return {
       id: item.uuid_product,
       stock: newStock,
