@@ -14,14 +14,14 @@ export async function POST(request: Request) {
 
   console.log("Data pesanan diterima:", data);
 
+  // Validasi: Cek apakah data kosong
+  if (!data || data.length === 0) {
+    return NextResponse.json({ error: "Pesanan kosong, tidak ada produk yang dipesan" }, { status: 400 });
+  }
+
   // Ambil semua ID produk dari pesanan
   const productIds = data.map((item: OrderItem) => item.product_id);
   console.log("Product IDs yang diminta:", productIds);
-
-  // Validasi: Cek apakah ada productIds yang kosong
-  if (productIds.length === 0) {
-    return NextResponse.json({ error: "Tidak ada produk dalam pesanan" }, { status: 400 });
-  }
 
   // Ambil stok produk dari database
   const { data: products, error } = await supabase
@@ -43,7 +43,10 @@ export async function POST(request: Request) {
   // Cek apakah stok cukup untuk semua produk
   for (const item of data) {
     const product = products.find(p => p.id === item.product_id);
-    if (!product || product.stock < item.quantity) {
+    if (!product) {
+      return NextResponse.json({ error: `Produk ID ${item.product_id} tidak ditemukan dalam database` }, { status: 404 });
+    }
+    if (product.stock < item.quantity) {
       return NextResponse.json({ error: `Stok tidak mencukupi untuk produk ID ${item.product_id}` }, { status: 400 });
     }
   }
@@ -53,7 +56,7 @@ export async function POST(request: Request) {
     const product = products.find(p => p.id === item.product_id);
     return {
       id: item.product_id,
-      stock: product!.stock - item.quantity,
+      stock: product ? product.stock - item.quantity : 0,
     };
   });
 
