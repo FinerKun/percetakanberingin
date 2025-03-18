@@ -123,11 +123,11 @@ if (!product) {
     req = await fetch("/api/transactions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json", // ✅ Sudah diperbaik
+        "Contet-type": "application/json",
       },
       body: JSON.stringify(ProductData),
     });
-    
+
     const response = await req.json();
 
     if (!response || !response.data) {
@@ -194,7 +194,7 @@ if (!product) {
         const response = await fetch("/api/upload", {
           method: "POST",
           headers: {
-            "Content-Type": file.type,
+            "Content-type": file.type,
             "X-Vercel-Filename": `transactions/${uuidv4()}-${file.name}`,
           },
           body: file,

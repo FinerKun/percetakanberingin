@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 const tableName = "order-items";
 
 interface OrderItem {
-  product_id: number;
+  product_id: string; // Ubah dari number ke string agar cocok dengan UUID
   quantity: number;
 }
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     const productIds = data.map((item) => item.product_id);
-    console.log("Product IDs yang diminta:", productIds);
+    console.log("Product UUIDs yang diminta:", productIds);
 
     const { data: products, error } = await supabase
       .from("products")
