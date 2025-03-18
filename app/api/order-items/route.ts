@@ -3,22 +3,6 @@ import { NextResponse } from "next/server";
 
 const tableName = "order-items";
 
-export async function GET(request: Request) {
-  let response;
-  const supabase = createClient();
-  const { searchParams } = new URL(request.url);
-  const uuid_transactions = searchParams.get("uuid_transactions") || "";
-
-  response = await supabase
-    .from(tableName)
-    .select()
-    .ilike("uuid_transactions", `%${uuid_transactions}%`);
-
-  return NextResponse.json(response);
-}
-
-
-
 interface OrderItem {
   product_id: number;
   quantity: number;
@@ -32,6 +16,12 @@ export async function POST(request: Request) {
 
   // Ambil semua ID produk dari pesanan
   const productIds = data.map((item: OrderItem) => item.product_id);
+  console.log("Product IDs yang diminta:", productIds);
+
+  // Validasi: Cek apakah ada productIds yang kosong
+  if (productIds.length === 0) {
+    return NextResponse.json({ error: "Tidak ada produk dalam pesanan" }, { status: 400 });
+  }
 
   // Ambil stok produk dari database
   const { data: products, error } = await supabase
@@ -39,8 +29,13 @@ export async function POST(request: Request) {
     .select("id, stock")
     .in("id", productIds);
 
-  if (error || !products) {
+  if (error) {
+    console.error("Error mengambil data produk:", error);
     return NextResponse.json({ error: "Gagal mengambil data produk" }, { status: 500 });
+  }
+
+  if (!products || products.length === 0) {
+    return NextResponse.json({ error: "Produk tidak ditemukan dalam database" }, { status: 404 });
   }
 
   console.log("Data produk di database:", products);
@@ -67,6 +62,7 @@ export async function POST(request: Request) {
     .upsert(updates, { onConflict: "id" }); // Perbaikan: Ubah onConflict menjadi string tunggal
 
   if (updateError) {
+    console.error("Error saat memperbarui stok produk:", updateError);
     return NextResponse.json({ error: "Gagal memperbarui stok produk" }, { status: 500 });
   }
 
@@ -74,34 +70,9 @@ export async function POST(request: Request) {
   const { data: orderResponse, error: orderError } = await supabase.from(tableName).insert(data).select();
 
   if (orderError) {
+    console.error("Error saat menyimpan pesanan:", orderError);
     return NextResponse.json({ error: "Gagal menyimpan pesanan" }, { status: 500 });
   }
 
   return NextResponse.json(orderResponse);
-}
-
-
-export async function PATCH(request: Request) {
-  const supabase = createClient();
-  const data = await request.json();
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-
-  const response = await supabase
-    .from(tableName)
-    .update(data)
-    .eq("id", id)
-    .select()
-    .single();
-
-  return NextResponse.json(response);
-}
-
-export async function DELETE(request: Request) {
-  const supabase = createClient();
-  const data = await request.json();
-
-  const response = await supabase.from(tableName).delete().eq("id", data.id);
-
-  return NextResponse.json(response);
 }
