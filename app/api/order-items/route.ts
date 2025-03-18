@@ -21,33 +21,6 @@ export async function POST(request: Request) {
   const supabase = createClient();
   const data = await request.json();
 
-  // Cek stok produk sebelum memasukkan order baru
-  const productResponse = await supabase
-    .from("products")
-    .select("stock")
-    .eq("id", data.product_id)
-    .single();
-
-  console.log("Product Response:", productResponse);
-
-  if (!productResponse.data) {
-    return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
-  }
-
-  console.log("Stock saat ini:", productResponse.data.stock);
-  console.log("Quantity yang dipesan:", data.quantity);
-
-  if (productResponse.data.stock < data.quantity) {
-    return NextResponse.json({ error: "Stok tidak mencukupi" }, { status: 400 });
-  }
-
-  // Kurangi stok produk
-  await supabase
-    .from("products")
-    .update({ stock: productResponse.data.stock - data.quantity })
-    .eq("id", data.product_id);
-
-  // Simpan order baru
   const response = await supabase.from(tableName).insert(data).select();
 
   return NextResponse.json(response);
