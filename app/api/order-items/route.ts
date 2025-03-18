@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 const tableName = "order-items";
 
 interface OrderItem {
-  product_id: string; // Ubah dari number ke string agar cocok dengan UUID
+  uuid_product: string; // Pastikan ini tetap string, lalu ubah ke UUID dalam query
   quantity: number;
 }
 
@@ -19,42 +19,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Pesanan kosong, tidak ada produk yang dipesan" }, { status: 400 });
     }
 
-    const productIds = data.map((item) => item.product_id);
-    console.log("Product UUIDs yang diminta:", productIds);
+    const productIds = data.map((item) => item.uuid_product);
+    console.log("Product UUIDs yang dikirim ke database:", productIds);
+
+    if (productIds.length === 0) {
+      console.error("Error: Tidak ada Product ID yang dikirim!");
+      return NextResponse.json({ error: "Tidak ada Product ID yang dikirim" }, { status: 400 });
+    }
+
+    // Konversi productIds dari string ke UUID untuk Supabase
+    const formattedProductIds = productIds.map(id => id.trim());
 
     const { data: products, error } = await supabase
       .from("products")
       .select("id, stock")
-      .in("id", productIds);
+      .in("id", formattedProductIds);
 
     if (error) {
-      console.error("Error mengambil data produk:", error);
+      console.error("Error mengambil data produk dari Supabase:", error);
       return NextResponse.json({ error: "Gagal mengambil data produk" }, { status: 500 });
     }
 
     if (!products || products.length === 0) {
-      console.error("Error: Produk tidak ditemukan dalam database");
+      console.error("Error: Produk tidak ditemukan dalam database. Product IDs yang dikirim:", formattedProductIds);
       return NextResponse.json({ error: "Produk tidak ditemukan dalam database" }, { status: 404 });
     }
 
-    console.log("Data produk di database:", products);
+    console.log("Data produk yang ditemukan di database:", products);
 
     for (const item of data) {
-      const product = products.find(p => p.id === item.product_id);
+      const product = products.find(p => p.id === item.uuid_product);
       if (!product) {
-        console.error(`Error: Produk ID ${item.product_id} tidak ditemukan dalam database`);
-        return NextResponse.json({ error: `Produk ID ${item.product_id} tidak ditemukan dalam database` }, { status: 404 });
+        console.error(`Error: Produk ID ${item.uuid_product} tidak ditemukan dalam database`);
+        return NextResponse.json({ error: `Produk ID ${item.uuid_product} tidak ditemukan dalam database` }, { status: 404 });
       }
       if (product.stock < item.quantity) {
-        console.error(`Error: Stok tidak mencukupi untuk produk ID ${item.product_id}`);
-        return NextResponse.json({ error: `Stok tidak mencukupi untuk produk ID ${item.product_id}` }, { status: 400 });
+        console.error(`Error: Stok tidak mencukupi untuk produk ID ${item.uuid_product}`);
+        return NextResponse.json({ error: `Stok tidak mencukupi untuk produk ID ${item.uuid_product}` }, { status: 400 });
       }
     }
 
     const updates = data.map((item) => {
-      const product = products.find(p => p.id === item.product_id);
+      const product = products.find(p => p.id === item.uuid_product);
       return {
-        id: item.product_id,
+        id: item.uuid_product,
         stock: product ? product.stock - item.quantity : 0,
       };
     });
