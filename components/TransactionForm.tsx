@@ -123,11 +123,11 @@ if (!product) {
     req = await fetch("/api/transactions", {
       method: "POST",
       headers: {
-        "Contet-type": "application/json",
+        "Content-Type": "application/json", // ✅ Sudah diperbaiki
       },
       body: JSON.stringify(ProductData),
     });
-
+    
     const response = await req.json();
 
     if (!response || !response.data) {
