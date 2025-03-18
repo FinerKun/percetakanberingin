@@ -154,10 +154,15 @@ if (!product) {
     const responseOrder = await reqOrder.json();
 
     setLoading(false);
-    if (responseOrder?.data[0]?.id) {
+    console.log("Response dari API Order Items:", responseOrder);
+    if (responseOrder && responseOrder.data && responseOrder.data.length > 0 && responseOrder.data[0].id) {
       alert("Pesananmu telah berhasil");
       location.reload();
+    } else {
+      console.error("Error: Response API tidak memiliki data yang valid", responseOrder);
+      alert("Terjadi kesalahan dalam memproses pesanan. Coba lagi.");
     }
+    
   };
 
   function deleteImage(imageUrl: string[] | string) {
