@@ -17,14 +17,34 @@ export async function GET(request: Request) {
   return NextResponse.json(response);
 }
 
+
 export async function POST(request: Request) {
   const supabase = createClient();
   const data = await request.json();
 
+  // Cek stok produk sebelum memasukkan order baru
+  const productResponse = await supabase
+    .from("products")
+    .select("stock")
+    .eq("id", data.product_id)
+    .single();
+
+  if (!productResponse.data || productResponse.data.stock < data.quantity) {
+    return NextResponse.json({ error: "Stok tidak mencukupi" }, { status: 400 });
+  }
+
+  // Kurangi stok produk
+  await supabase
+    .from("products")
+    .update({ stock: productResponse.data.stock - data.quantity })
+    .eq("id", data.product_id);
+
+  // Simpan order baru
   const response = await supabase.from(tableName).insert(data).select();
 
   return NextResponse.json(response);
 }
+
 
 export async function PATCH(request: Request) {
   const supabase = createClient();
@@ -50,3 +70,4 @@ export async function DELETE(request: Request) {
 
   return NextResponse.json(response);
 }
+
